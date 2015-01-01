@@ -1,6 +1,12 @@
 class Sound
   constructor: (@buffer, @view) ->
   
+  averageSamples: (start, end) ->
+    sum = 0
+    for i in [start...end]
+      sum += Math.abs @getSample i
+    return sum / (end - start)
+  
   base64: ->
     binary = ''
     bytes = new Uint8Array @buffer
@@ -27,10 +33,28 @@ class Sound
     # Return the result
     return new Sound buffer, view
   
-  duration: ->
-    size = view.getUint32(40) / 2
-    rate = view.getUint32 24
-    return size / rate
+  getDuration: ->
+    return @getSampleCount() / @getSampleRate()
+  
+  getSample: (idx) ->
+    return @view.getInt16(44 + idx*2, true) / 0x8000
+  
+  getSampleCount: ->
+    return @view.getUint32(40, true) / 2
+  
+  getSampleRate: ->
+    return @view.getUint32 24, true
+  
+  volumeAverages: (count) ->
+    total = @getSampleCount()
+    perAverage = total / count
+    res = []
+    for i in [0...count]
+      start = Math.floor i * total / count
+      end = start + Math.floor total / count
+      end = total if end > total
+      res.push @averageSamples start, end
+    return res
   
   @fromBase64: (b64) ->
     raw = window.atob b64

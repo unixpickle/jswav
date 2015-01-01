@@ -45,7 +45,7 @@
       AudioContext = window.AudioContext || window.webkitAudioContext;
       context = new AudioContext();
       source = context.createMediaStreamSource(this._stream);
-      processor = context.createScriptProcessor(16384, 1, 1);
+      processor = context.createScriptProcessor(1024, 1, 1);
       processor.onaudioprocess = (function(_this) {
         return function(evt) {
           var data;
@@ -152,6 +152,15 @@
       this.view = view;
     }
 
+    Sound.prototype.averageSamples = function(start, end) {
+      var i, sum, _i;
+      sum = 0;
+      for (i = _i = start; start <= end ? _i < end : _i > end; i = start <= end ? ++_i : --_i) {
+        sum += Math.abs(this.getSample(i));
+      }
+      return sum / (end - start);
+    };
+
     Sound.prototype.base64 = function() {
       var binary, bytes, x, _i, _len;
       binary = '';
@@ -182,11 +191,36 @@
       return new Sound(buffer, view);
     };
 
-    Sound.prototype.duration = function() {
-      var rate, size;
-      size = view.getUint32(40) / 2;
-      rate = view.getUint32(24);
-      return size / rate;
+    Sound.prototype.getDuration = function() {
+      return this.getSampleCount() / this.getSampleRate();
+    };
+
+    Sound.prototype.getSample = function(idx) {
+      return this.view.getInt16(44 + idx * 2, true) / 0x8000;
+    };
+
+    Sound.prototype.getSampleCount = function() {
+      return this.view.getUint32(40, true) / 2;
+    };
+
+    Sound.prototype.getSampleRate = function() {
+      return this.view.getUint32(24, true);
+    };
+
+    Sound.prototype.volumeAverages = function(count) {
+      var end, i, perAverage, res, start, total, _i;
+      total = this.getSampleCount();
+      perAverage = total / count;
+      res = [];
+      for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
+        start = Math.floor(i * total / count);
+        end = start + Math.floor(total / count);
+        if (end > total) {
+          end = total;
+        }
+        res.push(this.averageSamples(start, end));
+      }
+      return res;
     };
 
     Sound.fromBase64 = function(b64) {
