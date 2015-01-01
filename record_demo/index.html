@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Record Demo</title>
+    <script type="text/javascript" src="jswav.js"></script>
+    <script type="text/javascript">
+    var recording = null;
+    function toggleRecording() {
+      if (recording) {
+        recording.stop();
+        return
+      }
+      var button = document.getElementById('record');
+      button.innerHTML = 'Stop';
+      // Setup the recording
+      recording = new window.jswav.Recorder();
+      recording.onDone = function(sound) {
+        window.location = 'data:audio/wav;base64,' + sound.base64();
+        recording = null;
+        button.innerHTML = 'Start';
+      };
+      recording.onError = function(err) {
+        recording = null;
+        alert('Recording error: ' + err);
+        button.innerHTML = 'Start';
+      };
+      recording.start();
+    }
+    </script>
+  </head>
+  <body>
+    <button id="record" onclick="toggleRecording()">Record</button>
+  </body>
+</html>
