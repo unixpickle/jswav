@@ -55,14 +55,17 @@
   Sound.prototype.average = function(start, end) {
     var startIdx = this.indexForTime(start);
     var endIdx = this.indexForTime(end);
-    if (endIdx-startIdx == 0) {
+    if (endIdx-startIdx === 0) {
       return 0;
     }
     var sum = 0;
-    for (var i = startIdx; i < endIdx; i++) {
-      sum += Math.abs(this.getSample(i));
+    var channels = this.header.getChannels();
+    for (var i = startIdx; i < endIdx; ++i) {
+      for (var j = 0; j < channels; ++j) {
+        sum += Math.abs(this.getSample(i, j));
+      }
     }
-    return sum / (endIdx-startIdx);
+    return sum / (channels*(endIdx-startIdx));
   };
   
   Sound.prototype.crop = function(start, end) {
@@ -99,10 +102,10 @@
     }
     var bps = this.header.getBitsPerSample()
     var channels = this.header.getChannels();
-    if (bps == 8) {
+    if (bps === 8) {
       var offset = 44 + idx*channels + channel;
       return (this._view.getUint8(offset)-0x80) / 0x80;
-    } else if (bps == 16) {
+    } else if (bps === 16) {
       var offset = 44 + idx*channels*2 + channel*2;
       return this._view.getInt16(offset, true) / 0x8000;
     } else {
