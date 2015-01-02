@@ -96,7 +96,7 @@
   };
   
   Sound.prototype.getSample = function(idx, channel) {
-    if (!channel && channel != 0) {
+    if ('undefined' === typeof channel) {
       // Default value of channel is 0.
       channel = 0;
     }
@@ -128,9 +128,9 @@
     var duration = this.header.getDuration();
     var rawIdx = Math.floor(samples * time / duration);
     return Math.min(Math.max(rawIdx, 0), samples);
-  }
+  };
   
-  if !window.jswav {
+  if (!window.jswav) {
     window.jswav = {};
   }
   window.jswav.Sound = Sound;
