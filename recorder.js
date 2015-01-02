@@ -49,7 +49,7 @@
     if (this._stream !== null) {
       this._stream.stop();
     }
-  }
+  };
   
   Recorder.prototype._handleStream = function() {
     var AudioContext = (window.AudioContext || window.webkitAudioContext);
@@ -68,7 +68,7 @@
     if (this.onstart !== null) {
       this.onstart();
     }
-  }
+  };
   
   function getUserMedia(cb) {
     var gum = (navigator.getUserMedia || navigator.webkitGetUserMedia ||

@@ -68,6 +68,15 @@
     return sum / (channels*(endIdx-startIdx));
   };
   
+  Sound.prototype.base64 = function() {
+    var binary = ''
+    var bytes = new Uint8Array(this.buffer);
+    for (var i = 0, len = bytes.length; i < len; ++i) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+  
   Sound.prototype.crop = function(start, end) {
     var startIdx = this.indexForTime(start);
     var endIdx = this.indexForTime(end);
