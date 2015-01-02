@@ -2,7 +2,9 @@
 <html>
   <head>
     <title>Record Demo</title>
-    <script type="text/javascript" src="jswav.js"></script>
+    <script type="text/javascript" src="../sound.js"></script>
+    <script type="text/javascript" src="../recorder.js"></script>
+    <script type="text/javascript" src="../wavnode.js"></script>
     <script type="text/javascript">
     var recording = null;
     function toggleRecording() {
@@ -14,12 +16,12 @@
       button.innerHTML = 'Stop';
       // Setup the recording
       recording = new window.jswav.Recorder();
-      recording.onDone = function(sound) {
+      recording.ondone = function(sound) {
         window.location = 'data:audio/wav;base64,' + sound.base64();
         recording = null;
         button.innerHTML = 'Start';
       };
-      recording.onError = function(err) {
+      recording.onerror = function(err) {
         recording = null;
         alert('Recording error: ' + err);
         button.innerHTML = 'Start';
