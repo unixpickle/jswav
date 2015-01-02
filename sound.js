@@ -1,4 +1,5 @@
 (function() {
+
   function Header(view) {
     this.view = view;
   }
@@ -38,8 +39,8 @@
     
     this.view.setUint32(4, totalSize + 36, true); // size of "RIFF"
     this.view.setUint16(22, channels, true); // channel count
-    this.view.setUint32(24, sampleRate, true); // sample rate
-    this.view.setUint32(28, sampleRate * channels * bitsPerSample / 8,
+    this.view.setUint32(24, rate, true); // sample rate
+    this.view.setUint32(28, rate * channels * bitsPerSample / 8,
       true); // byte rate
     this.view.setUint16(32, bitsPerSample * channels / 8, true); // block align
     this.view.setUint16(34, bitsPerSample, true); // bits per sample
@@ -143,4 +144,6 @@
     window.jswav = {};
   }
   window.jswav.Sound = Sound;
+  window.jswav.Header = Header;
+
 })();

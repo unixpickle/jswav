@@ -1,17 +1,15 @@
 (function() {
   
-  function WavNode() {
+  function WavNode(context, ch) {
     this.node = null;
     this._buffers = [];
     this._sampleCount = 0;
     this._sampleRate = 0;
     this._channels = 0;
     if (context.createScriptProcessor) {
-      this.node = context.createScriptProcessor(1024, this.channels,
-        this.channels);
+      this.node = context.createScriptProcessor(1024, ch, ch);
     } else if (context.createJavaScriptNode) {
-      this.node = context.createJavaScriptNode(1024, this.channels,
-        this.channels);
+      this.node = context.createJavaScriptNode(1024, ch, ch);
     } else {
       throw new Error('No javascript processing node available.');
     }
@@ -26,12 +24,12 @@
       
       // Interleave the audio data
       var sampleCount = input.length;
-      this._sampleCount += dataCount;
+      this._sampleCount += sampleCount;
       var buffer = new ArrayBuffer(sampleCount * this._channels * 2);
       var view = new DataView(buffer);
       var x = 0;
       for (var i = 0; i < sampleCount; ++i) {
-        for (var j = 0; j < input.numberOfChannels; ++j) {
+        for (var j = 0; j < this._channels; ++j) {
           var value = Math.round(input.getChannelData(j)[i] * 0x8000);
           view.setInt16(x, value, true);
           x += 2;
@@ -50,7 +48,7 @@
     var view = new DataView(buffer);
     
     // Setup the header
-    var header = new Header(view);
+    var header = new window.jswav.Header(view);
     header.setDefaults();
     header.setFields(this._sampleCount, this._sampleRate, 16, this._channels);
     
@@ -59,12 +57,12 @@
     for (var i = 0; i < this._buffers.length; ++i) {
       var aBuffer = this._buffers[i];
       var aView = new DataView(aBuffer);
-      var len = aBuffer.length;
+      var len = aBuffer.byteLength;
       for (var j = 0; j < len; ++j) {
         view.setUint8(byteIdx++, aView.getUint8(j));
       }
     }
-    
+
     return new window.jswav.Sound(buffer);
   };
   

@@ -55,7 +55,7 @@
     var AudioContext = (window.AudioContext || window.webkitAudioContext);
     var context = new AudioContext();
     var source = context.createMediaStreamSource(this._stream);
-    var wavNode = new window.jswav.WavNode();
+    var wavNode = new window.jswav.WavNode(context, this.channels);
     source.connect(wavNode.node);
     wavNode.node.connect(context.destination);
     this._stream.onended = function() {
