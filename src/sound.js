@@ -49,9 +49,19 @@
   
   function Sound(buffer) {
     this.buffer = buffer;
+    this._view = new DataView(buffer);
     this.header = new Header(this._view);
-    this._view = new DataView(this.buffer);
   }
+  
+  Sound.fromBase64 = function(str) {
+    var raw = window.atob(str);
+    var buffer = new ArrayBuffer(raw.length);
+    var bytes = new Uint8Array(buffer);
+    for (var i = 0; i < raw.length; ++i) {
+      bytes[i] = raw.charCodeAt(i);
+    }
+    return new Sound(buffer);
+  };
   
   Sound.prototype.average = function(start, end) {
     var startIdx = this.indexForTime(start);
