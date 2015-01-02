@@ -47,7 +47,14 @@
     }
     this._stopped = true;
     if (this._stream !== null) {
+      var stream = this._stream;
       this._stream.stop();
+      // Firefox does not fire the onended event.
+      setTimeout(function() {
+        if (stream.onended) {
+          stream.onended();
+        }
+      }, 500);
     }
   };
   
@@ -59,6 +66,7 @@
     source.connect(wavNode.node);
     wavNode.node.connect(context.destination);
     this._stream.onended = function() {
+      this._stream.onended = null;
       source.disconnect(wavNode.node);
       wavNode.node.disconnect(context.destination);
       if (this.ondone !== null) {
@@ -189,12 +197,14 @@
     var startIdx = this.indexForTime(start);
     var endIdx = this.indexForTime(end);
     
-    // Create a new buffer and other variables
+    // Figure out a bunch of math
     var channels = this.header.getChannels();
     var bps = this.header.getBitsPerSample();
     var copyCount = endIdx - startIdx;
     var blockSize = channels * bps / 8;
     var copyBytes = blockSize * copyCount;
+    
+    // Create a new buffer
     var buffer = new ArrayBuffer(copyBytes + 44);
     var view = new DataView(buffer);
     
@@ -206,7 +216,7 @@
     // Copy the sample data
     var bufferSource = startIdx*blockSize + 44;
     for (var i = 0; i < copyBytes; ++i) {
-      view.setUint8(i+44, this.view.getUint8(bufferSource+i));
+      view.setUint8(i+44, this._view.getUint8(bufferSource+i));
     }
     
     return new Sound(buffer);

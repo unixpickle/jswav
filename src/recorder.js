@@ -47,7 +47,14 @@
     }
     this._stopped = true;
     if (this._stream !== null) {
+      var stream = this._stream;
       this._stream.stop();
+      // Firefox does not fire the onended event.
+      setTimeout(function() {
+        if (stream.onended) {
+          stream.onended();
+        }
+      }, 500);
     }
   };
   
@@ -59,6 +66,7 @@
     source.connect(wavNode.node);
     wavNode.node.connect(context.destination);
     this._stream.onended = function() {
+      this._stream.onended = null;
       source.disconnect(wavNode.node);
       wavNode.node.disconnect(context.destination);
       if (this.ondone !== null) {
