@@ -1,5 +1,5 @@
 (function() {
-  
+
   function Recorder() {
     this.ondone = null;
     this.onerror = null;
@@ -9,7 +9,7 @@
     this._stopped = false;
     this._stream = null;
   }
-  
+
   Recorder.prototype.start = function() {
     if (this._started) {
       throw new Error('Recorder was already started.');
@@ -25,6 +25,7 @@
         }
         return;
       }
+      addStopMethod(stream);
       this._stream = stream;
       try {
         this._handleStream();
@@ -37,7 +38,7 @@
       }
     }.bind(this));
   };
-  
+
   Recorder.prototype.stop = function() {
     if (!this._started) {
       throw new Error('Recorder was not started.');
@@ -57,7 +58,7 @@
       }, 500);
     }
   };
-  
+
   Recorder.prototype._handleStream = function() {
     var AudioContext = (window.AudioContext || window.webkitAudioContext);
     var context = new AudioContext();
@@ -77,7 +78,7 @@
       this.onstart();
     }
   };
-  
+
   function getUserMedia(cb) {
     var gum = (navigator.getUserMedia || navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia || navigator.msGetUserMedia);
@@ -96,10 +97,21 @@
       }
     );
   }
-  
+
+  function addStopMethod(stream) {
+    if ('undefined' === typeof stream.stop) {
+      stream.stop = function() {
+        var tracks = this.getTracks();
+        for (var i = 0, len = tracks.length; i < len; ++i) {
+          tracks[i].stop();
+        }
+      };
+    }
+  }
+
   if (!window.jswav) {
     window.jswav = {};
   }
   window.jswav.Recorder = Recorder;
-  
+
 })();
